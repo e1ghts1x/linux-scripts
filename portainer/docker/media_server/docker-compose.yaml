@@ -1,0 +1,124 @@
+version: "3.8"
+
+services:
+  # ---- qBittorrent ----
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    networks:
+      - media
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+      - WEBUI_PORT=8585
+    ports:
+      - 8585:8585
+      - 6881:6881
+      - 6881:6881/udp
+    volumes:
+      - ./qbittorrent/config:/config
+      - ./downloads:/downloads
+
+  # ---- Sonarr ----
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    networks:
+      - media
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - 8989:8989
+    volumes:
+      - ./sonarr/config:/config
+      - ./downloads:/downloads
+      - ./media/tv:/tv
+
+  # ---- Radarr ----
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    networks:
+      - media
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - 7878:7878
+    volumes:
+      - ./radarr/config:/config
+      - ./downloads:/downloads
+      - ./media/movies:/movies
+
+  # ---- Prowlarr ----
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    networks:
+      - media
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - 9696:9696
+    volumes:
+      - ./prowlarr/config:/config
+
+  # ---- FlareSolverr ----
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    networks:
+      - media
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/Sao_Paulo
+    ports:
+      - 8191:8191
+  # ---- Bazzar ----
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    ports:
+      - "6767:6767"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    volumes:
+      - ./bazzar/config:/config
+      - ./media/movies:/movies
+      - ./media/tv:/tv
+
+  # ---- Emby ----
+  emby:
+    image: lscr.io/linuxserver/emby:latest
+    container_name: emby
+    restart: unless-stopped
+    networks:
+      - media
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - 8096:8096   # HTTP
+      - 8920:8920   # HTTPS (opcional)
+    volumes:
+      - ./emby/config:/config
+      - ./media:/mnt/share1
+
+networks:
+  media:
+    driver: bridge
